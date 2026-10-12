@@ -3,46 +3,46 @@
 --estrela base e e criacao
 --da classe estrela
 star={
- --parametros sao> posicao,
- --velocidade, raio, cor
- x=rnd(128), y=rnd(128),
- spd=1, rad=1, clr=7,
---funcao para criar novas estrelas
- new=function(self,tbl)
-  tbl=tbl or {}
-  setmetatable(tbl,{__index=self})
-  return tbl
- end,
---estrela_update
- update=function(self)
-  --faz se mover pra baixo
-  self.y += self.spd
-  --se sair da tela volta pra
-  --cima em uma nova posicao
-  if self.y-self.rad > 127 then
-   self.y=-self.rad
-   self.x=rnd(127)
-  end --end if
- end, --end funcao
- --draw estrela
- draw=function(self)
-  circfill(self.x,self.y,
-  self.rad,self.clr)
- end
+  --parametros sao> posicao,
+  --velocidade, raio, cor
+  x=rnd(128), y=rnd(128),
+  spd=1, rad=1, clr=7,
+  --funcao para criar novas estrelas
+  new=function(self,tbl)
+    tbl=tbl or {}
+    setmetatable(tbl,{__index=self})
+    return tbl
+  end,
+  --estrela_update
+  update=function(self)
+    --faz se mover pra baixo
+    self.y += self.spd
+    --se sair da tela volta pra
+    --cima em uma nova posicao
+    if self.y-self.rad > 127 then
+      self.y=-self.rad
+      self.x=rnd(127)
+    end --end if
+  end, --end funcao
+  --draw estrela
+  draw=function(self)
+    circfill(self.x,self.y,
+    self.rad,self.clr)
+  end
 }
 
 function init_stars()
- local used_y={}
+  local used_y={}
  
- --essa funcao cria varias
- --estrelas de tipos aleatorios
- for i = 1,50 do
-  local ny=flr(rnd(127))
-  --randomiza posicao e faz
-  --dnv caso posicao repetida
-  while used_y[ny] do
-   ny=flr(rnd(127))
-  end --while end
+  --essa funcao cria varias
+  --estrelas de tipos aleatorios
+  for i = 1,50 do
+    local ny=flr(rnd(127))
+    --randomiza posicao e faz
+    --dnv caso posicao repetida
+    while used_y[ny] do
+    ny=flr(rnd(127))
+    end --while end
 --adciona a posicao das estrelas
 --na lista de posicoes usadas  
   add(used_y,ny)
@@ -50,16 +50,16 @@ function init_stars()
   local star_type=rnd(star_types)
 --adciona estrelas na lista  
   add(stars,star_type:new({x=rnd(127),y=ny}))
- end -- for end
+  end -- for end
 --loop pra estrelas grandes
- for i = 1,8 do
-  local ny=flr(rnd(127))
-   while used_y[ny] do
-    ny=flr(rnd(127))
-   end
-  add(used_y,ny)
-  add(stars,star4:new({x=rnd(127),y=rnd(127)}))
- end 
+  for i = 1,8 do
+    local ny=flr(rnd(127))
+    while used_y[ny] do
+      ny=flr(rnd(127))
+    end
+    add(used_y,ny)
+    add(stars,star4:new({x=rnd(127),y=rnd(127)}))
+  end 
 end
 
 --tipos de estrelas

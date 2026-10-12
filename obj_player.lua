@@ -5,10 +5,11 @@
 --e move o player
 
 function init_p()
-player={}
-p1={x=56,y=108,sp=1,hp=3,htb={},inv=0}
-add(player,p1)
-set_timer(3,"delay_tiro")
+	player={}
+	p1={x=56,y=108,sp=1,hp=3,htb={},inv=0}
+	add(player,p1)
+	set_timer(3,"delay_tiro")
+	c_tiro=0
 end
 
 
@@ -43,11 +44,11 @@ end
 
 
 function update_p()
- for p in all(player) do
-  checkbutt(p)
-  col_p(p)
-  p.htb={p.x+3,p.y+5,p.x+12,p.y+15}
- end
+	for p in all(player) do
+		checkbutt(p)
+		col_p(p)
+		p.htb={p.x+3,p.y+5,p.x+12,p.y+15}
+	end
 end
 
 
@@ -58,6 +59,9 @@ function draw_p()
 		else
 			pisca_p()
 		end -- if inv
+		if tiro_foi_dado() then
+			spr(48,px+4,py-8)
+		end
 	end -- for
 end-- funcao
 
@@ -71,3 +75,4 @@ function pisca_p(p)
 	spr(p.sp,p.x,p.y,2,2)
 	pal()
 end
+

@@ -7,14 +7,6 @@
 
 ]]--
 
-function init_provisorio()
- pspr={1,5,1,5,1,5,1}
- px=56
- py=112
- ispr=(33)
- etime=0
-end
-
 
 function obj_update()
 	

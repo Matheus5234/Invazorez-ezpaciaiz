@@ -1,11 +1,11 @@
 --tools
 
 function init_obj()
- stars={}
- star_types= {star1, star2, star3}
+	stars={}
+	star_types= {star1, star2, star3}
 	tiros={}
 	inimigos={}
- cronometro={}
+	init_cronometro()
 end
 
 
@@ -51,35 +51,43 @@ end --end funcao
 
 function hud()
  --desenhar vida 
- for v = 1,3 do
-	 if v <= vida_p then
-	  spr(16,(v*10)-5,8)
-	 else
-	 	spr(32,(v*10)-5,8)
-	 end
-	 rect(3,6,34,17,3)
-	 print("vida",4,2,7)
-	 spr(15,3,19)
+	for v = 1,3 do
+		if v <= p1.hp then
+		spr(16,(v*10)-5,8)
+		else
+		spr(32,(v*10)-5,8)
+		end
+	end
+	rect(3,6,34,17,3)
+	print("vida",4,2,7)
+	spr(15,3,19)
 	 --[[
 	 rectfill(29,55,102,88,7)
 	 pal(5,0)
 	 spr(64,30,56,9,4)
   pal()
  ]]--
- end
 end
 
 
+function init_cronometro()
+	cronometro={}
+	timer_base={t=0,n="base",r=0}
+	add(cronometro,timer_base)
+end
 
 function update_cronometro()
- for t in all(cronometro) do
-  t.t-=1
- end
+	for t in all(cronometro) do
+		t.t-=1
+	end
 end
 
 
 function set_timer(tempo,nome)
 	local resetar = tempo
+	for t in all(cronometro) do
+		if nome == t.n then return end
+	end
 	add(cronometro,{t=tempo,n=nome,r=resetar})
 end
 
@@ -104,3 +112,27 @@ function timer(nome)
 	end --end loop
 end --end funcao
 
+
+function conta_tiro()
+	local conta_tiro=0
+	for t in all(tiros) do
+		if t.nome == "tiro" then
+			conta_tiro+=1
+		end
+	end
+	c_tiro=conta_tiro
+end
+
+function tiro_foi_dado()
+	local c=0
+	for t in all(tiros) do
+		if t.nome == "tiro" then 
+			c+=1
+		end
+	end
+	if c_tiro < c then
+		return true
+	else
+		return false
+	end
+end
