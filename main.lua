@@ -1,21 +1,12 @@
 function _init()
-	init_p()
+	init_cronometro()
 	init_obj()
-	init_stars() --stars
-	vida_p=3
-	hitbox_p={}
-	player_timer=0
-	pisca=1
-	timer_pisca=10
-	--screen_shake=false
-	--shake_timer=15
+	init_stars()
+	init_p()
 	shake_init() --tools
-	timer_tiro=0
 	pos_asteroide={130,-8}
-	init_asteroides()
-	for i=1,11 do
- 		add(inimigos,alien_azul:new({x=i*10,y=8}))
-	end
+	init_inimigos()
+	
 	--flash=0
 	t=0
 end
@@ -26,7 +17,6 @@ function _update()
 	shake_update()
  	update_p()
  	obj_update()
-	colisao_update()
 	--flash do alien azul
 	for i in all(inimigos) do
 	 	if i.nome == "alien_azul" then
@@ -65,10 +55,6 @@ function _draw()
   end
  end
 ]]-- 
-	 if btnp(❎) then
-	  spr(48,px+4,py-8)
-	 end
-	 
-	 hud()
+	hud()
  
 end

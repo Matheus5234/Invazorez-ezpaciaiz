@@ -1,11 +1,11 @@
 --tools
 
 function init_obj()
+	player={}
 	stars={}
 	star_types= {star1, star2, star3}
 	tiros={}
 	inimigos={}
-	init_cronometro()
 end
 
 
@@ -72,11 +72,14 @@ end
 
 function init_cronometro()
 	cronometro={}
-	timer_base={t=0,n="base",r=0}
+	timer_base={t=10,n="base",r=10}
 	add(cronometro,timer_base)
 end
 
 function update_cronometro()
+	if timer("base") then
+		reset_timer("base")
+	end
 	for t in all(cronometro) do
 		t.t-=1
 	end
@@ -91,10 +94,10 @@ function set_timer(tempo,nome)
 	add(cronometro,{t=tempo,n=nome,r=resetar})
 end
 
-function reset_timer(nome)
+function reset_timer(nome,newset)
 	for t in all(cronometro) do
 		if t.n == nome then
-			t.t = t.r
+			t.t = newset or t.r
 		end
 	end
 
@@ -113,26 +116,3 @@ function timer(nome)
 end --end funcao
 
 
-function conta_tiro()
-	local conta_tiro=0
-	for t in all(tiros) do
-		if t.nome == "tiro" then
-			conta_tiro+=1
-		end
-	end
-	c_tiro=conta_tiro
-end
-
-function tiro_foi_dado()
-	local c=0
-	for t in all(tiros) do
-		if t.nome == "tiro" then 
-			c+=1
-		end
-	end
-	if c_tiro < c then
-		return true
-	else
-		return false
-	end
-end

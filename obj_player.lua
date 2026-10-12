@@ -1,11 +1,6 @@
 --player
 
---essa funcao checa os botoes
---usa colisao na borda da tela
---e move o player
-
 function init_p()
-	player={}
 	p1={x=56,y=108,sp=1,hp=3,htb={},inv=0}
 	add(player,p1)
 	set_timer(3,"delay_tiro")
@@ -76,3 +71,26 @@ function pisca_p(p)
 	pal()
 end
 
+function conta_tiro()
+	local conta_tiro=0
+	for t in all(tiros) do
+		if t.nome == "tiro" then
+			conta_tiro+=1
+		end
+	end
+	c_tiro=conta_tiro
+end
+
+function tiro_foi_dado()
+	local c=0
+	for t in all(tiros) do
+		if t.nome == "tiro" then 
+			c+=1
+		end
+	end
+	if c_tiro < c then
+		return true
+	else
+		return false
+	end
+end

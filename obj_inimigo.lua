@@ -26,6 +26,7 @@ function move_enemy()
 end --end funcao
 
 
+
 inimigo = {nome="asteroide",
   x=0,y=0,spd=1,vida=1,
   sp=36,htb={},
@@ -36,27 +37,34 @@ inimigo = {nome="asteroide",
   end,
   update=function(self)
     if self.vida <= 0 then del(inimigos,self) end
+    --converte velocidade pra sempre descer
     if self.spd <  0 then
       self.y-=self.spd
     else
       self.y+=self.spd
     end
+
     self.x+=self.spd
     self.htb={self.x,self.y,self.x+7,self.y+7}
   end,
- draw=function(self)
-  spr(self.sp,self.x,self.y,1,1)
- end
+  draw=function(self)
+    spr(self.sp,self.x,self.y,1,1)
+  end
 }
 
 
-function init_asteroides()
+function init_inimigos()
+  set_timer("alien_azul",120,1)
+  set_timer("a_a_tiro",30,1)
   for i =1,5 do
     add(inimigos,inimigo:new({x=rnd(pos_asteroide),y=rnd(40)-20,spd=flr(rnd(3)+1)}))
   end
   for i in all(inimigos) do
     if i.x > 128 then i.spd=i.spd*-1 end
   end
+  for i=1,11 do
+ 		add(inimigos,alien_azul:new({x=i*10,y=8}))
+	end
 end
 
 alien_azul=inimigo:new({nome="alien_azul",
