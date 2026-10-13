@@ -9,20 +9,17 @@ function _init()
 	init_stars()
 	init_p()
 	shake_init() --tools
-	pos_asteroide={130,-8}
 	init_inimigos()
-	
-	--flash=0
 	t=0
 end
 
 
 function _update()
- 	conta_tiro()
 		shake_update()
  	update_p()
  	obj_update()
  	col_update()
+ 	asteroid_spawner()
 	--flash do alien azul
 	for i in all(inimigos) do
 	 	if i.nome == "alien_azul" then
@@ -61,8 +58,8 @@ function _draw()
   end
  end
 ]]-- 
+	
 	hud()
- 
 end
 -->8
 --obj_player
@@ -71,24 +68,23 @@ function init_p()
 	p1={x=56,y=108,sp=1,hp=3,htb={},inv=0}
 	add(player,p1)
 	set_timer(3,"delay_tiro")
-	c_tiro=0
 end
 
 
 function checkbutt(p)
-	npx=p.x
-	npy=p.y
+	local npx=p.x
+	local npy=p.y
 	if btn(⬆️) then
-		npy-=1
+		npy-=2
 	end
 	if btn(⬇️) then
-		npy+=1
+		npy+=2
 	end
 	if btn(⬅️) then
-		npx-=2
+		npx-=3
 	end
 	if btn(➡️) then
-		npx+=2
+		npx+=3
 	end
  if colisao_1(npx,npy) then
 		p.x=npx
@@ -116,51 +112,32 @@ end
 
 function draw_p()
 	for p in all(player) do
-		if p.inv <= 0 then
-			spr(p.sp,p.x,p.y,2,2)
-		else
+		flash_tiro(p)
+		if p.inv > 0 then
 			pisca_p()
 		end -- if inv
-		if tiro_foi_dado() then
-			spr(48,p.x+4,p.y-8)
-		end
+		spr(p.sp,p.x,p.y,2,2)
+		pal()
 	end -- for
 end-- funcao
 
 --funcao para piscar player
-function pisca_p(p)
-	if sin(t/4) < -0.5 then
+function pisca_p()
+	if sin(t/12) < 0.3 then
 		for i = 1,15 do
 			pal(i,7)
 		end
 	end 
-	spr(p.sp,p.x,p.y,2,2)
-	pal()
 end
 
-function conta_tiro()
-	local conta_tiro=0
-	for t in all(tiros) do
-		if t.nome == "tiro" then
-			conta_tiro+=1
+function flash_tiro(p)
+ if timer("delay_tiro") then
+			if btn(❎) then
+				spr(48,p.x+4,p.y-8)
+			end
 		end
-	end
-	c_tiro=conta_tiro
 end
 
-function tiro_foi_dado()
-	local c=0
-	for t in all(tiros) do
-		if t.nome == "tiro" then 
-			c+=1
-		end
-	end
-	if c_tiro < c then
-		return true
-	else
-		return false
-	end
-end
 -->8
 --obj_stars
 
@@ -248,7 +225,7 @@ star4=star:new({rad=1,spd=1.75})
 --posicao,morto,velocidade,
 --sprite,colisao(lista vazia)
 tiro = {x=0,y=0,dead=false,nome="tiro",
-	spd=-8,sp=0,htb={},
+	spd=-7,sp=0,htb={},
 	--cria novo tiro
 	new=function(self,tbl)
 		tbl=tbl or {}
@@ -256,7 +233,7 @@ tiro = {x=0,y=0,dead=false,nome="tiro",
 		return tbl
 	end,
 	--tiro update
-	t_update=function(self)
+	update=function(self)
 		--move pra cima
 		self.y+=self.spd
 		if self.y < -4 or  self.y > 124 then
@@ -264,8 +241,8 @@ tiro = {x=0,y=0,dead=false,nome="tiro",
 		end --se sair da tela = morto
 	end,
 	--draw tiro
-	t_draw=function(self)
-		spr(self.tspr,self.tx,self.ty)
+	draw=function(self)
+		spr(self.sp,self.x,self.y)
 	end,
 }
 
@@ -302,51 +279,67 @@ end --end funcao
 
 
 
-inimigo = {nome="asteroide",
-  x=0,y=0,spd=1,vida=1,
-  sp=36,htb={},
+asteroide = {nome="asteroide",
+  x=0,y=0,spd=1,hp=1,spdx=1,spdy=1,
+  sp=36,htb={},pisca=false,
   new=function(self,tbl)
     tbl=tbl or {}
     setmetatable(tbl,{__index=self})
     return tbl
   end,
   update=function(self)
-    if self.vida <= 0 then del(inimigos,self) end
-    --converte velocidade pra sempre descer
-    if self.spd <  0 then
-      self.y-=self.spd
-    else
-      self.y+=self.spd
+    if self.hp <= 0 then del(inimigos,self) end
+    if self.y > 128 then
+     del(inimigos,self)
     end
-
-    self.x+=self.spd
-    self.htb={self.x,self.y,self.x+7,self.y+7}
+    
+    self.y+=self.spdy
+    self.x+=self.spdx
   end,
   draw=function(self)
+    draw_pisca(self)
     spr(self.sp,self.x,self.y,1,1)
+    pal()  
   end
 }
 
+function asteroid_spawner()
+ if timer("asteroide") then 
+  spawn_asteroide()
+  reset_timer("asteroide")
+ end
+end
+
+function spawn_asteroide()
+ add(inimigos,asteroide:new({x=rnd(pos_asteroide),y=rnd(80)-40,spdx=flr(rnd(3)+1),spdy=flr(rnd(3)+1)}))
+ for i in all(inimigos) do
+   if i.nome == "asteroide" then 
+	  	if i.x > 127 then
+	    i.spdx=i.spdx*-1
+	   end
+	  end
+  end
+end
 
 function init_inimigos()
+  set_timer(90,"asteroide")
   set_timer(120,"alien_azul")
   set_timer(30,"a_a_tiro")
-  for i =1,5 do
-    add(inimigos,inimigo:new({x=rnd(pos_asteroide),y=rnd(40)-20,spd=flr(rnd(3)+1)}))
+  pos_asteroide={128,-8}
+  for i =1,3 do
+   --spawn_asteroide()
   end
-  for i in all(inimigos) do
-    if i.x > 128 then i.spd=i.spd*-1 end
-  end
+  
   for i=1,11 do
  		add(inimigos,alien_azul:new({x=i*10,y=8}))
 	end
 end
 
-alien_azul=inimigo:new({nome="alien_azul",
+alien_azul=asteroide:new({nome="alien_azul",
   hp=3,sp=51,r_timer={150,180,210,240},
-  timer=150,atirar=false,flash=0,
+  timer=150,atirar=false,flash=0,pisca=false,
   update=function(self)
-    if self.vida <= 0 then del(inimigos,self) end
+    if self.hp <= 0 then del(inimigos,self) end
     self.timer-=1
     if self.timer < 0 then
       self.sp+=1
@@ -361,7 +354,9 @@ alien_azul=inimigo:new({nome="alien_azul",
     self.htb={self.x,self.y,self.x+7,self.y+7}
   end,
  draw=function(self)
+  draw_pisca(self)
   spr(self.sp,self.x,self.y,1,1)
+  pal()
   if self.timer > 2500 then
  	 circfill(self.x+4,self.y+8,self.flash,7)
  	 self.flash+=0.1
@@ -370,6 +365,16 @@ alien_azul=inimigo:new({nome="alien_azul",
   end
  end
 })
+
+function draw_pisca(obj)
+ if obj.pisca then
+  for  i = 1,15 do
+   pal(i,7)
+  end
+  obj.pisca=false
+ end
+end
+
 
 -->8
 --colisao
@@ -434,8 +439,9 @@ end
 
 function col_p()
  for p in all(player) do
+		p.inv-=1
 		-- tiro x player
-	 	if p.inv <= 0 then
+	 if p.inv <= 0 then
 			for t in all(tiros) do
 				if check_colisao(p.htb,t.htb) then
 					p.inv=70
@@ -446,39 +452,39 @@ function col_p()
 					break
 				end --if colisao
 			end --  for
-		else
-			p.inv-=1
-		end --if else
+		end
 		
 		--player x inimigos menores
 		if p.inv <= 0 then
 			for i in all(inimigos) do 
 				if check_colisao(p.htb,i.htb) then
-		  			i.hp-=1
-		   			p.inv=70
-		  			sfx(1)
-		  			shake_screen(15,0.5)
-		  			p.hp-=1
+		  		i.hp-=1
+		   	p.inv=70
+		  		sfx(1)
+		  		shake_screen(15,0.5)
+		  		p.hp-=1
+		  		i.pisca=true
 					break
-		  		end
-	  		end
-		else
-			p.inv-=1
-		end
+		  end
+	  end
+	 end
+		
 		
 		--player x inimigos maiores 
 		if p.inv<=0 then
-	  		for i in all(inimigos) do 
+	  for i in all(inimigos) do 
 				if check_colisao(i.htb,p.htb) then
 		  			i.hp-=1
 		  			p.inv=70
 		  			sfx(1)
 		  			shake_screen(15,0.5)
 		  			p.hp-=1
+		  			i.pisca=true
 					break
 				end
 			end
 		end
+		
 	end --loop
 end --end funcao
 
@@ -489,8 +495,9 @@ function col_inimigos()
     for t in all(tiros) do
       if t.nome=="tiro" then
         if check_colisao(i.htb,t.htb) then
-          del(tiros,t)
-          i.vida-=1
+          t.dead=true
+          i.hp-=1
+          i.pisca=true
         end --if colisao
       end --  if tiro
     end --laco tiros
@@ -558,14 +565,14 @@ function hud()
  --desenhar vida 
 	for v = 1,3 do
 		if v <= p1.hp then
-		spr(16,(v*10)-5,8)
+		spr(16,(v*10)-5,115)
 		else
-		spr(32,(v*10)-5,8)
+		spr(32,(v*10)-5,115)
 		end
 	end
-	rect(3,6,34,17,3)
-	print("vida",4,2,7)
-	spr(15,3,19)
+	rect(3,113,34,124,3)
+	print("vida",4,109,7)
+	spr(15,118,118)
 	 --[[
 	 rectfill(29,55,102,88,7)
 	 pal(5,0)
@@ -594,7 +601,7 @@ end
 function set_timer(tempo,nome)
 	local resetar = tempo
 	for t in all(cronometro) do
-		if nome == t.n then return end
+		if nome == t.n then return nil end
 	end
 	add(cronometro,{t=tempo,n=nome,r=resetar})
 end
@@ -632,10 +639,11 @@ function obj_update()
  
  --inimigo_update
 	for i in all(inimigos) do
+		i:update()
 		if i.nome=="asteroide" then 
-		 	i:update()
+		 i.htb={i.x,i.y,i.x+7,i.y+7}
 		elseif i.nome=="alien_azul" then	 	
-			i:update()
+			i.htb={i.x,i.y,i.x+7,i.y+7}
 			--codigo pro inimigo atirar
 			if i.atirar==true then
 			 	add(tiros,bola_azul:new({x=i.x+2,y=i.y+6}))
@@ -646,12 +654,12 @@ function obj_update()
  
  
 	for tiro in all(tiros) do
-		tiro:t_update()
+		tiro:update()
 		tiro.htb={tiro.x,tiro.y,tiro.x+3,tiro.y+3}
 		if tiro.dead then
 			del(tiros, tiro)
 		end --se sai do map del tiro
- 	end --end laco tiros
+ end --end laco tiros
 end --end_funcao
 
 
@@ -669,7 +677,7 @@ function obj_draw()
  
  --draw tiros
  for tiro in all(tiros) do
-		tiro:t_draw()
+		tiro:draw()
  end
 
 end --end_funcao
